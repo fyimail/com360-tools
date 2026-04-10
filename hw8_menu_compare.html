@@ -118,7 +118,7 @@ body { background: #0f0f1a; color: #e0e0e0; font-family: 'Inter', system-ui, san
   </div>
 
   <div class="section-title">3. FULL PAGE with opacity (scroll to inspect)</div>
-  <div class="view-area" id="fullView" style="height: 600px;"></div>
+  <div id="fullView" style="height: 600px; overflow-y: auto; overflow-x: hidden; border: 2px solid #e94560; position: relative;"></div>
 </div>
 
 <div class="instructions" id="instructionsPanel">
@@ -331,12 +331,14 @@ async function loadComparison() {
   kgCrop.style.height = (cropHeight * 0.5) + 'px';
   kgCrop.innerHTML = `<img src="${kgUrl}" style="width:${w}px;display:block;transform:scale(0.5);transform-origin:top left;margin-top:${-cropTop * 0.5}px;">`;
 
-  // Full page view
+  // Full page view — scrollable container with tall inner wrapper
   const fullView = document.getElementById('fullView');
-  fullView.style.width = w + 'px';
+  fullView.style.width = (w + 4) + 'px'; // +4 for border
   fullView.innerHTML = `
-    <img src="${kgUrl}" style="width:${w}px;display:block;position:absolute;top:0;left:0;">
-    <iframe src="${iframeSrc}" class="student-overlay student-iframe" style="width:${w}px;height:3000px;position:absolute;top:0;left:0;border:none;opacity:${opacity};pointer-events:none;"></iframe>
+    <div style="position:relative;width:${w}px;height:3000px;">
+      <img src="${kgUrl}" style="width:${w}px;display:block;position:absolute;top:0;left:0;">
+      <iframe src="${iframeSrc}" class="student-overlay student-iframe" style="width:${w}px;height:3000px;position:absolute;top:0;left:0;border:none;opacity:${opacity};pointer-events:none;"></iframe>
+    </div>
   `;
 }
 
