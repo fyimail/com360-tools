@@ -76,23 +76,25 @@ body { background: #0f0f1a; color: #e0e0e0; font-family: 'Inter', system-ui, san
   <label>KG Screenshot: <input type="text" id="kgUrl" placeholder="https://cdn.imgchest.com/files/..."></label>
   <label>Width: <input type="number" id="viewWidth" value="1200"></label>
   <div class="sep"></div>
-  <label style="cursor:pointer;user-select:none;"><input type="checkbox" id="redColor"> 🔴 Red Color</label>
+  <label style="cursor:pointer;user-select:none;"><input type="checkbox" id="redColor" checked> 🔴 Red Color</label>
   <label>Opacity: <input type="range" id="opacitySlider" min="0" max="100" value="50"> <span id="opacityVal">0.5</span></label>
   <button onclick="loadComparison()">Load</button>
 </div>
 
 <div class="section-bar" id="sectionBar">
-  <label>📦 Section:</label>
-  <button class="box-btn active" onclick="setBox(0,66,this)" title="Row 1: Logo (1) + Menu (6)">1+6 Menu</button>
-  <button class="box-btn" onclick="setBox(66,354,this)" title="Row 2: Hero banner">2 Hero</button>
-  <button class="box-btn" onclick="setBox(420,447,this)" title="Row 3: Jobs (3) + Industries (7)">3+7 Jobs</button>
-  <button class="box-btn" onclick="setBox(867,339,this)" title="Row 4: Footer area">4 Footer</button>
-  <button class="box-btn" onclick="setBox(1206,60,this)" title="Row 5: Copyright bar">5 Copyright</button>
+  <span id="dynamicButtons">
+    <button class="box-btn active" onclick="setBox(0,66,this)" title="Row 1: Logo (1) + Menu (6)">1+6 Menu</button>
+    <button class="box-btn" onclick="setBox(66,354,this)" title="Row 2: Hero banner">2 Hero</button>
+    <button class="box-btn" onclick="setBox(420,447,this)" title="Row 3: Jobs (3) + Industries (7)">3+7 Jobs</button>
+    <button class="box-btn" onclick="setBox(867,339,this)" title="Row 4: Footer area">4 Footer</button>
+    <button class="box-btn" onclick="setBox(1206,60,this)" title="Row 5: Copyright bar">5 Copyright</button>
+  </span>
+  <span id="detectStatus" style="font-size:11px;color:#666;"></span>
   <label class="sep"></label>
   <label>Top: <input type="number" id="cropTop" value="0"></label>
   <label>Height: <input type="number" id="cropHeight" value="66"></label>
   <button class="box-btn" onclick="applyCrop()" style="background:#e94560;color:#fff;border-color:#e94560;">Apply</button>
-  <span class="box-hint">← Preset values are approximate (based on 1241px width). Fine-tune with Top & Height.</span>
+  <span class="box-hint">← Buttons auto-detect from student's grid. Fine-tune with Top & Height.</span>
 </div>
 
 <div class="share-bar">
@@ -239,6 +241,36 @@ function copyShareLink() {
 let redBlobUrl = null;
 let redBlobSourceUrl = null;
 
+// --- Grid detection script injected into blob HTML ---
+function getGridDetectScript() {
+  return [
+    '<scr' + 'ipt>',
+    'window.addEventListener("load", function() {',
+    '  try {',
+    '    var w = document.querySelector(".wrapper, .grid-container, .grid, [class*=wrapper], [class*=grid]") || document.body.firstElementChild;',
+    '    if (!w) return;',
+    '    var ch = Array.from(w.children).filter(function(el) {',
+    '      var r = el.getBoundingClientRect();',
+    '      return r.height > 2 && el.tagName !== "SCRIPT" && el.tagName !== "STYLE" && el.tagName !== "LINK";',
+    '    });',
+    '    if (ch.length < 2) return;',
+    '    var rows = [];',
+    '    ch.forEach(function(c) {',
+    '      var r = c.getBoundingClientRect();',
+    '      var t = Math.round(r.top);',
+    '      var h = Math.round(r.height);',
+    '      var f = rows.find(function(row) { return Math.abs(row.top - t) < 5; });',
+    '      if (f) { f.height = Math.max(f.height, h); f.count++; f.hint += " + " + (c.className.split(" ")[0] || c.tagName.toLowerCase()); }',
+    '      else { rows.push({ top: t, height: h, count: 1, hint: c.className.split(" ")[0] || c.tagName.toLowerCase() }); }',
+    '    });',
+    '    rows.sort(function(a, b) { return a.top - b.top; });',
+    '    if (rows.length >= 2) window.parent.postMessage({ type: "gridDetected", rows: rows }, "*");',
+    '  } catch(e) {}',
+    '});',
+    '</scr' + 'ipt>'
+  ].join('\n');
+}
+
 async function buildRedUrl(studentUrl) {
   if (redBlobUrl && redBlobSourceUrl === studentUrl) return redBlobUrl;
   try {
@@ -250,6 +282,12 @@ async function buildRedUrl(studentUrl) {
       html = html.replace(/<head([^>]*)>/i, `<head$1>${inject}`);
     } else {
       html = inject + html;
+    }
+    // Inject grid detection script
+    if (html.match(/<\/body>/i)) {
+      html = html.replace(/<\/body>/i, `${getGridDetectScript()}</body>`);
+    } else {
+      html += getGridDetectScript();
     }
     if (redBlobUrl) URL.revokeObjectURL(redBlobUrl);
     redBlobUrl = URL.createObjectURL(new Blob([html], {type: 'text/html'}));
@@ -266,6 +304,15 @@ function invalidateRedCache() {
   redBlobUrl = null;
   redBlobSourceUrl = null;
 }
+
+// --- Listen for grid detection results from injected script ---
+window.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'gridDetected' && e.data.rows) {
+    const rows = e.data.rows;
+    buildDynamicButtons(rows);
+    document.getElementById('detectStatus').textContent = `✅ ${rows.length} rows detected`;
+  }
+});
 
 // --- Opacity control ---
 opacitySlider.addEventListener('input', () => {
@@ -340,6 +387,27 @@ async function loadComparison() {
       <iframe src="${iframeSrc}" class="student-overlay student-iframe" style="width:${w}px;height:3000px;position:absolute;top:0;left:0;border:none;opacity:${opacity};pointer-events:none;"></iframe>
     </div>
   `;
+
+  document.getElementById('detectStatus').textContent = '⏳ detecting rows...';
+}
+
+function buildDynamicButtons(rows) {
+  const container = document.getElementById('dynamicButtons');
+  container.innerHTML = '';
+  rows.forEach((row, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'box-btn' + (i === 0 ? ' active' : '');
+    const label = row.count > 1 ? `Row ${i+1} (${row.count})` : `Row ${i+1}`;
+    btn.textContent = label;
+    btn.title = `${row.hint} — top:${row.top} h:${row.height}`;
+    const t = row.top, h = row.height;
+    btn.onclick = function() { setBox(t, h, this); };
+    container.appendChild(btn);
+  });
+  if (rows.length > 0) {
+    document.getElementById('cropTop').value = rows[0].top;
+    document.getElementById('cropHeight').value = rows[0].height;
+  }
 }
 
 // Auto-load if URL params provided
