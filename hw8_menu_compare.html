@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HW8 Menu Comparison Tool — COM-360</title>
-<meta name="description" content="Compare your CSS menu implementation against the target KG website screenshot. Overlay and side-by-side views for pixel-perfect verification.">
+<title>Grid Section Comparison Tool — COM-360</title>
+<meta name="description" content="Compare any grid section of your CSS implementation against the target KG website screenshot. Overlay and side-by-side views for pixel-perfect verification.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -18,15 +18,25 @@ body { background: #0f0f1a; color: #e0e0e0; font-family: 'Inter', system-ui, san
 .header p { font-size: 13px; color: #8888aa; }
 
 /* --- Controls --- */
-.controls { padding: 12px 20px; background: #16213e; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid #1e2d50; }
-.controls label { font-size: 13px; font-weight: 500; color: #b0b0cc; }
-.controls input[type="text"] { width: 320px; background: #0f1e38; color: #fff; border: 1px solid #2a3a5a; padding: 6px 10px; border-radius: 4px; font-family: 'Inter', monospace; font-size: 12px; }
+.controls { padding: 10px 20px; background: #16213e; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid #1e2d50; }
+.controls label { font-size: 12px; font-weight: 500; color: #b0b0cc; }
+.controls input[type="text"] { width: 300px; background: #0f1e38; color: #fff; border: 1px solid #2a3a5a; padding: 5px 8px; border-radius: 4px; font-family: 'Inter', monospace; font-size: 12px; }
 .controls input[type="text"]:focus { border-color: #e94560; outline: none; }
-.controls input[type="number"] { width: 80px; background: #0f1e38; color: #fff; border: 1px solid #2a3a5a; padding: 6px 8px; border-radius: 4px; font-size: 13px; }
-.controls input[type="range"] { width: 120px; accent-color: #e94560; }
+.controls input[type="number"] { width: 70px; background: #0f1e38; color: #fff; border: 1px solid #2a3a5a; padding: 5px 6px; border-radius: 4px; font-size: 12px; }
+.controls input[type="range"] { width: 100px; accent-color: #e94560; }
 .controls input[type="checkbox"] { accent-color: #e94560; }
-.controls button { background: #e94560; color: white; border: none; padding: 7px 18px; cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 13px; transition: background 0.2s; }
+.controls button { background: #e94560; color: white; border: none; padding: 6px 16px; cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 13px; transition: background 0.2s; }
 .controls button:hover { background: #d63050; }
+.controls .sep { width: 1px; height: 28px; background: #2a3a5a; }
+
+/* --- Section selector --- */
+.section-bar { padding: 8px 20px; background: #0d1528; border-bottom: 1px solid #1e2d50; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.section-bar label { font-size: 12px; font-weight: 500; color: #8888aa; }
+.section-bar input[type="number"] { width: 65px; background: #0f1e38; color: #fff; border: 1px solid #2a3a5a; padding: 5px 6px; border-radius: 4px; font-size: 12px; }
+.section-bar .box-btn { background: #1e2d50; color: #b0b0cc; border: 1px solid #2a3a5a; padding: 4px 12px; cursor: pointer; border-radius: 4px; font-size: 12px; font-weight: 500; transition: all 0.2s; }
+.section-bar .box-btn:hover { background: #2a3a5a; }
+.section-bar .box-btn.active { background: #e94560; color: #fff; border-color: #e94560; }
+.section-bar .box-hint { font-size: 11px; color: #555577; font-style: italic; }
 
 /* --- Content --- */
 .section-title { padding: 10px 20px; font-size: 14px; font-weight: 600; background: #0f1e38; color: #c0c0e0; border-top: 1px solid #1e2d50; }
@@ -37,7 +47,7 @@ body { background: #0f0f1a; color: #e0e0e0; font-family: 'Inter', system-ui, san
 .side-by-side h3 { text-align: center; padding: 6px; background: #1a1a3e; font-size: 12px; font-weight: 600; color: #8888aa; text-transform: uppercase; letter-spacing: 0.5px; }
 .crop-box { overflow: hidden; position: relative; border: 2px solid #e9a000; border-radius: 4px; }
 
-/* --- Instructions (shown when no URL provided) --- */
+/* --- Instructions --- */
 .instructions { max-width: 700px; margin: 60px auto; padding: 40px; text-align: center; }
 .instructions h2 { font-size: 22px; margin-bottom: 16px; color: #fff; }
 .instructions p { font-size: 14px; color: #8888aa; line-height: 1.7; margin-bottom: 12px; }
@@ -47,27 +57,41 @@ body { background: #0f0f1a; color: #e0e0e0; font-family: 'Inter', system-ui, san
 .instructions .steps li strong { color: #fff; }
 
 /* --- Link sharing bar --- */
-.share-bar { padding: 8px 20px; background: #0d1528; border-top: 1px solid #1e2d50; display: flex; gap: 10px; align-items: center; }
-.share-bar label { font-size: 12px; color: #666688; white-space: nowrap; }
-.share-bar input { flex: 1; background: #0f1e38; color: #8888aa; border: 1px solid #1e2d50; padding: 5px 8px; border-radius: 4px; font-size: 11px; font-family: monospace; }
-.share-bar button { background: #2a3a5a; color: #b0b0cc; border: none; padding: 5px 12px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+.share-bar { padding: 6px 20px; background: #0a0f1a; border-top: 1px solid #1e2d50; display: flex; gap: 10px; align-items: center; }
+.share-bar label { font-size: 11px; color: #555577; white-space: nowrap; }
+.share-bar input { flex: 1; background: #0f1e38; color: #777799; border: 1px solid #1e2d50; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-family: monospace; }
+.share-bar button { background: #2a3a5a; color: #b0b0cc; border: none; padding: 4px 10px; cursor: pointer; border-radius: 4px; font-size: 11px; }
 .share-bar button:hover { background: #3a4a6a; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>HW8 Menu <span>Comparison Tool</span></h1>
-  <p>COM-360 Web Page Design — Compare your CSS menu against the target KG website screenshot</p>
+  <h1>Grid Section <span>Comparison Tool</span></h1>
+  <p>COM-360 Web Page Design — Compare any grid section of your page against the target KG website screenshot</p>
 </div>
 
 <div class="controls" id="controlBar">
   <label>Student URL: <input type="text" id="studentUrl" placeholder="https://username.github.io/personal-page/hw8/"></label>
   <label>KG Screenshot: <input type="text" id="kgUrl" placeholder="https://cdn.imgchest.com/files/..."></label>
   <label>Width: <input type="number" id="viewWidth" value="1200"></label>
+  <div class="sep"></div>
   <label style="cursor:pointer;user-select:none;"><input type="checkbox" id="redColor"> 🔴 Red Color</label>
   <label>Opacity: <input type="range" id="opacitySlider" min="0" max="100" value="50"> <span id="opacityVal">0.5</span></label>
   <button onclick="loadComparison()">Load</button>
+</div>
+
+<div class="section-bar" id="sectionBar">
+  <label>📦 Section:</label>
+  <button class="box-btn active" onclick="setBox(0,70,this)" title="Menu / Nav bar">Box 1 (Menu)</button>
+  <button class="box-btn" onclick="setBox(70,450,this)" title="Hero / Banner area">Box 2 (Hero)</button>
+  <button class="box-btn" onclick="setBox(520,200,this)" title="Content row 1">Box 3</button>
+  <button class="box-btn" onclick="setBox(720,200,this)" title="Content row 2">Box 4</button>
+  <label class="sep"></label>
+  <label>Top: <input type="number" id="cropTop" value="0"></label>
+  <label>Height: <input type="number" id="cropHeight" value="70"></label>
+  <button class="box-btn" onclick="applyCrop()" style="background:#e94560;color:#fff;border-color:#e94560;">Apply</button>
+  <span class="box-hint">← Adjust Top & Height for any custom section, or click a Box preset</span>
 </div>
 
 <div class="share-bar">
@@ -77,17 +101,17 @@ body { background: #0f0f1a; color: #e0e0e0; font-family: 'Inter', system-ui, san
 </div>
 
 <div id="mainContent" style="display:none;">
-  <div class="section-title">1. OVERLAY VIEW — Student's menu (with opacity) over KG screenshot</div>
+  <div class="section-title" id="overlayTitle">1. OVERLAY VIEW — Student's section (with opacity) over KG screenshot</div>
   <div class="view-area" id="overlayView" style="height: 80px;"></div>
 
-  <div class="section-title">2. SIDE-BY-SIDE — Student menu crop vs KG menu crop</div>
+  <div class="section-title" id="sideTitle">2. SIDE-BY-SIDE — Student section crop vs KG section crop</div>
   <div class="side-by-side" id="sideBySide">
     <div>
-      <h3>Student's CSS Menu</h3>
+      <h3>Student's CSS</h3>
       <div class="crop-box" id="studentCrop" style="height: 70px;"></div>
     </div>
     <div>
-      <h3>KG Screenshot Menu</h3>
+      <h3>KG Screenshot</h3>
       <div class="crop-box" id="kgCrop" style="height: 70px;"></div>
     </div>
   </div>
@@ -97,15 +121,16 @@ body { background: #0f0f1a; color: #e0e0e0; font-family: 'Inter', system-ui, san
 </div>
 
 <div class="instructions" id="instructionsPanel">
-  <h2>🔍 Compare Your Menu</h2>
-  <p>This tool overlays your CSS-generated menu on top of the original KG website screenshot so you can check for pixel-perfect accuracy.</p>
+  <h2>🔍 Compare Any Grid Section</h2>
+  <p>This tool overlays your CSS page on top of the original KG website screenshot so you can check for pixel-perfect accuracy — for the menu, hero, or any grid box.</p>
   <ol class="steps">
     <li><strong>Enter your GitHub Pages URL</strong> — e.g. <code>https://username.github.io/personal-page/hw8/</code></li>
-    <li><strong>Enter the KG screenshot URL</strong> — from the assignment email you received</li>
-    <li><strong>Set the width</strong> — the <code>max-width</code> value from your assignment email</li>
+    <li><strong>Enter the KG screenshot URL</strong> — from the assignment instructions</li>
+    <li><strong>Set the width</strong> — the <code>max-width</code> value from your assignment</li>
     <li>Click <strong>Load</strong> to compare</li>
+    <li>Use the <strong>📦 Section</strong> bar to switch between grid boxes (Menu, Hero, Box 3, etc.) or set custom <strong>Top</strong> &amp; <strong>Height</strong> values</li>
   </ol>
-  <p style="margin-top: 20px;">💡 <strong>Tip:</strong> Check the <strong>🔴 Red Color</strong> box to make your CSS text red — this makes it easy to spot differences between your text and the original white menu text underneath.</p>
+  <p style="margin-top: 20px;">💡 <strong>Tip:</strong> Check the <strong>🔴 Red Color</strong> box to make your CSS text red — this makes it easy to spot differences between your text and the original text underneath.</p>
 </div>
 
 <script>
@@ -114,22 +139,87 @@ const params = new URLSearchParams(window.location.search);
 const paramUrl = params.get('url') || '';
 const paramKg = params.get('kg') || '';
 const paramWidth = params.get('width') || '';
+const paramTop = params.get('top') || '';
+const paramHeight = params.get('height') || '';
+const paramBox = params.get('box') || '';
 
 if (paramUrl) document.getElementById('studentUrl').value = paramUrl;
 if (paramKg) document.getElementById('kgUrl').value = paramKg;
 if (paramWidth) document.getElementById('viewWidth').value = paramWidth;
+if (paramTop) document.getElementById('cropTop').value = paramTop;
+if (paramHeight) document.getElementById('cropHeight').value = paramHeight;
+
+// Box presets: [top, height]
+const boxPresets = {
+  '1': [0, 70],
+  '2': [70, 450],
+  '3': [520, 200],
+  '4': [720, 200],
+};
+
+// Apply box param
+if (paramBox && boxPresets[paramBox]) {
+  document.getElementById('cropTop').value = boxPresets[paramBox][0];
+  document.getElementById('cropHeight').value = boxPresets[paramBox][1];
+  // Highlight the correct button
+  document.querySelectorAll('.box-btn').forEach(b => b.classList.remove('active'));
+  const idx = parseInt(paramBox) - 1;
+  const btns = document.querySelectorAll('#sectionBar .box-btn');
+  if (btns[idx]) btns[idx].classList.add('active');
+}
 
 const opacitySlider = document.getElementById('opacitySlider');
 const opacityVal = document.getElementById('opacityVal');
 const redColor = document.getElementById('redColor');
+
+// --- Box preset buttons ---
+function setBox(top, height, btn) {
+  document.getElementById('cropTop').value = top;
+  document.getElementById('cropHeight').value = height;
+  document.querySelectorAll('.box-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  applyCrop();
+}
+
+function applyCrop() {
+  const top = parseInt(document.getElementById('cropTop').value) || 0;
+  const height = parseInt(document.getElementById('cropHeight').value) || 70;
+  const w = parseInt(document.getElementById('viewWidth').value) || 1200;
+
+  // Update overlay view
+  const overlay = document.getElementById('overlayView');
+  overlay.style.height = height + 'px';
+  const overlayImg = overlay.querySelector('img');
+  const overlayIframe = overlay.querySelector('iframe');
+  if (overlayImg) overlayImg.style.top = (-top) + 'px';
+  if (overlayIframe) overlayIframe.style.top = (-top) + 'px';
+
+  // Update side-by-side crops
+  const studentCrop = document.getElementById('studentCrop');
+  const kgCrop = document.getElementById('kgCrop');
+  studentCrop.style.height = (height * 0.5) + 'px';
+  kgCrop.style.height = (height * 0.5) + 'px';
+  const studentIframe = studentCrop.querySelector('iframe');
+  const kgImg = kgCrop.querySelector('img');
+  if (studentIframe) studentIframe.style.marginTop = (-top * 0.5) + 'px';
+  if (kgImg) kgImg.style.marginTop = (-top * 0.5) + 'px';
+
+  // Update shareable link
+  updateShareLink();
+}
 
 // --- Shareable Link ---
 function updateShareLink() {
   const url = document.getElementById('studentUrl').value;
   const kg = document.getElementById('kgUrl').value;
   const w = document.getElementById('viewWidth').value;
+  const top = document.getElementById('cropTop').value;
+  const height = document.getElementById('cropHeight').value;
   const base = window.location.origin + window.location.pathname;
-  const share = `${base}?url=${encodeURIComponent(url)}&kg=${encodeURIComponent(kg)}&width=${w}`;
+  let share = `${base}?url=${encodeURIComponent(url)}&kg=${encodeURIComponent(kg)}&width=${w}`;
+  if (top !== '0' || height !== '70') {
+    share += `&top=${top}&height=${height}`;
+  }
   document.getElementById('shareLink').value = share;
 }
 
@@ -142,7 +232,7 @@ function copyShareLink() {
   setTimeout(() => btn.textContent = 'Copy', 2000);
 }
 
-// --- Red Color Injection (fetch student HTML, inject color:red) ---
+// --- Red Color Injection ---
 let redBlobUrl = null;
 let redBlobSourceUrl = null;
 
@@ -199,6 +289,8 @@ async function loadComparison() {
   const kgUrl = document.getElementById('kgUrl').value;
   const w = parseInt(document.getElementById('viewWidth').value);
   const opacity = opacitySlider.value / 100;
+  const cropTop = parseInt(document.getElementById('cropTop').value) || 0;
+  const cropHeight = parseInt(document.getElementById('cropHeight').value) || 70;
 
   if (!studentUrl || !kgUrl) {
     alert('Please enter both a Student URL and KG Screenshot URL.');
@@ -214,32 +306,34 @@ async function loadComparison() {
 
   // Invalidate red cache if student URL changed
   if (redBlobSourceUrl !== studentUrl) invalidateRedCache();
-
   const iframeSrc = redColor.checked ? await buildRedUrl(studentUrl) : studentUrl;
 
-  // Overlay view
+  // Overlay view — cropped to selected section
   const overlay = document.getElementById('overlayView');
   overlay.style.width = w + 'px';
+  overlay.style.height = cropHeight + 'px';
   overlay.innerHTML = `
-    <img src="${kgUrl}" style="width:${w}px;display:block;position:absolute;top:0;left:0;">
-    <iframe src="${iframeSrc}" class="student-overlay student-iframe" style="width:${w}px;height:1200px;position:absolute;top:0;left:0;border:none;opacity:${opacity};pointer-events:none;"></iframe>
+    <img src="${kgUrl}" style="width:${w}px;display:block;position:absolute;top:${-cropTop}px;left:0;">
+    <iframe src="${iframeSrc}" class="student-overlay student-iframe" style="width:${w}px;height:3000px;position:absolute;top:${-cropTop}px;left:0;border:none;opacity:${opacity};pointer-events:none;"></iframe>
   `;
 
-  // Side by side crops
+  // Side by side crops — scaled 0.5x
   const studentCrop = document.getElementById('studentCrop');
   studentCrop.style.width = (w/2) + 'px';
-  studentCrop.innerHTML = `<iframe src="${iframeSrc}" class="student-iframe" style="width:${w}px;height:1200px;border:none;transform:scale(0.5);transform-origin:top left;"></iframe>`;
+  studentCrop.style.height = (cropHeight * 0.5) + 'px';
+  studentCrop.innerHTML = `<iframe src="${iframeSrc}" class="student-iframe" style="width:${w}px;height:3000px;border:none;transform:scale(0.5);transform-origin:top left;margin-top:${-cropTop * 0.5}px;"></iframe>`;
 
   const kgCrop = document.getElementById('kgCrop');
   kgCrop.style.width = (w/2) + 'px';
-  kgCrop.innerHTML = `<img src="${kgUrl}" style="width:${w}px;display:block;transform:scale(0.5);transform-origin:top left;">`;
+  kgCrop.style.height = (cropHeight * 0.5) + 'px';
+  kgCrop.innerHTML = `<img src="${kgUrl}" style="width:${w}px;display:block;transform:scale(0.5);transform-origin:top left;margin-top:${-cropTop * 0.5}px;">`;
 
   // Full page view
   const fullView = document.getElementById('fullView');
   fullView.style.width = w + 'px';
   fullView.innerHTML = `
     <img src="${kgUrl}" style="width:${w}px;display:block;position:absolute;top:0;left:0;">
-    <iframe src="${iframeSrc}" class="student-overlay student-iframe" style="width:${w}px;height:1600px;position:absolute;top:0;left:0;border:none;opacity:${opacity};pointer-events:none;"></iframe>
+    <iframe src="${iframeSrc}" class="student-overlay student-iframe" style="width:${w}px;height:3000px;position:absolute;top:0;left:0;border:none;opacity:${opacity};pointer-events:none;"></iframe>
   `;
 }
 
