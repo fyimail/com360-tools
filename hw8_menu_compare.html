@@ -83,15 +83,16 @@ body { background: #0f0f1a; color: #e0e0e0; font-family: 'Inter', system-ui, san
 
 <div class="section-bar" id="sectionBar">
   <label>📦 Section:</label>
-  <button class="box-btn active" onclick="setBox(0,70,this)" title="Menu / Nav bar">Box 1 (Menu)</button>
-  <button class="box-btn" onclick="setBox(70,450,this)" title="Hero / Banner area">Box 2 (Hero)</button>
-  <button class="box-btn" onclick="setBox(520,200,this)" title="Content row 1">Box 3</button>
-  <button class="box-btn" onclick="setBox(720,200,this)" title="Content row 2">Box 4</button>
+  <button class="box-btn active" onclick="setBox(0,66,this)" title="Row 1: Logo (1) + Menu (6)">1+6 Menu</button>
+  <button class="box-btn" onclick="setBox(66,354,this)" title="Row 2: Hero banner">2 Hero</button>
+  <button class="box-btn" onclick="setBox(420,447,this)" title="Row 3: Jobs (3) + Industries (7)">3+7 Jobs</button>
+  <button class="box-btn" onclick="setBox(867,339,this)" title="Row 4: Footer area">4 Footer</button>
+  <button class="box-btn" onclick="setBox(1206,60,this)" title="Row 5: Copyright bar">5 Copyright</button>
   <label class="sep"></label>
   <label>Top: <input type="number" id="cropTop" value="0"></label>
-  <label>Height: <input type="number" id="cropHeight" value="70"></label>
+  <label>Height: <input type="number" id="cropHeight" value="66"></label>
   <button class="box-btn" onclick="applyCrop()" style="background:#e94560;color:#fff;border-color:#e94560;">Apply</button>
-  <span class="box-hint">← Adjust Top & Height for any custom section, or click a Box preset</span>
+  <span class="box-hint">← Preset values are approximate (based on 1241px width). Fine-tune with Top & Height.</span>
 </div>
 
 <div class="share-bar">
@@ -149,12 +150,14 @@ if (paramWidth) document.getElementById('viewWidth').value = paramWidth;
 if (paramTop) document.getElementById('cropTop').value = paramTop;
 if (paramHeight) document.getElementById('cropHeight').value = paramHeight;
 
-// Box presets: [top, height]
+// Box presets: [top, height] — measured from Ali Sina's page at 1241px width
+// These are approximate; students should fine-tune with Top/Height inputs
 const boxPresets = {
-  '1': [0, 70],
-  '2': [70, 450],
-  '3': [520, 200],
-  '4': [720, 200],
+  '1': [0, 66],      // Row 1: Logo (area 1) + Menu (area 6)
+  '2': [66, 354],    // Row 2: Hero banner (area 2)
+  '3': [420, 447],   // Row 3: Jobs of the day (area 3) + Jobs by industry (area 7)
+  '4': [867, 339],   // Row 4: Footer (area 4)
+  '5': [1206, 60],   // Row 5: Copyright (area 5)
 };
 
 // Apply box param
