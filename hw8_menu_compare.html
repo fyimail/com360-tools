@@ -76,7 +76,15 @@ body { background: #0f0f1a; color: #e0e0e0; font-family: 'Inter', system-ui, san
   <label>KG Screenshot: <input type="text" id="kgUrl" placeholder="https://cdn.imgchest.com/files/..."></label>
   <label>Width: <input type="number" id="viewWidth" value="1200"></label>
   <div class="sep"></div>
-  <label style="cursor:pointer;user-select:none;"><input type="checkbox" id="redColor" checked> 🔴 Red Color</label>
+  <label>🎨 <select id="colorSelect" onchange="invalidateRedCache()">
+    <option value="red" selected>Red</option>
+    <option value="#0066ff">Blue</option>
+    <option value="#00cc44">Green</option>
+    <option value="#ff00ff">Magenta</option>
+    <option value="#ff8800">Orange</option>
+    <option value="#00cccc">Cyan</option>
+    <option value="">Off</option>
+  </select></label>
   <label>Opacity: <input type="range" id="opacitySlider" min="0" max="100" value="50"> <span id="opacityVal">0.5</span></label>
   <button onclick="loadComparison()">Load</button>
 </div>
@@ -273,12 +281,14 @@ function getGridDetectScript() {
 }
 
 async function buildRedUrl(studentUrl) {
-  if (redBlobUrl && redBlobSourceUrl === studentUrl) return redBlobUrl;
+  const selectedColor = document.getElementById('colorSelect').value;
+  const cacheKey = studentUrl + '|' + selectedColor;
+  if (redBlobUrl && redBlobSourceUrl === cacheKey) return redBlobUrl;
   try {
     const resp = await fetch(studentUrl);
     let html = await resp.text();
     const baseUrl = studentUrl.endsWith('/') ? studentUrl : studentUrl.substring(0, studentUrl.lastIndexOf('/') + 1);
-    const inject = `<base href="${baseUrl}"><style>*{color:red!important;border-color:red!important;}</style>`;
+    const inject = `<base href="${baseUrl}"><style>*{color:${selectedColor}!important;border-color:${selectedColor}!important;}</style>`;
     if (html.match(/<head[^>]*>/i)) {
       html = html.replace(/<head([^>]*)>/i, `<head$1>${inject}`);
     } else {
@@ -292,7 +302,7 @@ async function buildRedUrl(studentUrl) {
     }
     if (redBlobUrl) URL.revokeObjectURL(redBlobUrl);
     redBlobUrl = URL.createObjectURL(new Blob([html], {type: 'text/html'}));
-    redBlobSourceUrl = studentUrl;
+    redBlobSourceUrl = cacheKey;
     return redBlobUrl;
   } catch(e) {
     console.error('Red injection failed (CORS?):', e);
@@ -357,7 +367,8 @@ async function loadComparison() {
 
   // Invalidate red cache if student URL changed
   if (redBlobSourceUrl !== studentUrl) invalidateRedCache();
-  const iframeSrc = redColor.checked ? await buildRedUrl(studentUrl) : studentUrl;
+  const colorVal = document.getElementById('colorSelect').value;
+  const iframeSrc = colorVal ? await buildRedUrl(studentUrl) : studentUrl;
 
   // Overlay view — cropped to selected section
   const overlay = document.getElementById('overlayView');
