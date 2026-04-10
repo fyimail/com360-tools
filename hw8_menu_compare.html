@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HW8 Menu Comparison Tool — COM-360</title>
+<meta name="description" content="Compare your CSS menu implementation against the target KG website screenshot. Overlay and side-by-side views for pixel-perfect verification.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; box-sizing: border-box; }
+body { background: #0f0f1a; color: #e0e0e0; font-family: 'Inter', system-ui, sans-serif; }
+
+/* --- Header --- */
+.header { padding: 16px 20px; background: linear-gradient(135deg, #1a1a3e 0%, #16213e 100%); border-bottom: 1px solid #2a2a5a; }
+.header h1 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.header h1 span { color: #e94560; }
+.header p { font-size: 13px; color: #8888aa; }
+
+/* --- Controls --- */
+.controls { padding: 12px 20px; background: #16213e; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid #1e2d50; }
+.controls label { font-size: 13px; font-weight: 500; color: #b0b0cc; }
+.controls input[type="text"] { width: 320px; background: #0f1e38; color: #fff; border: 1px solid #2a3a5a; padding: 6px 10px; border-radius: 4px; font-family: 'Inter', monospace; font-size: 12px; }
+.controls input[type="text"]:focus { border-color: #e94560; outline: none; }
+.controls input[type="number"] { width: 80px; background: #0f1e38; color: #fff; border: 1px solid #2a3a5a; padding: 6px 8px; border-radius: 4px; font-size: 13px; }
+.controls input[type="range"] { width: 120px; accent-color: #e94560; }
+.controls input[type="checkbox"] { accent-color: #e94560; }
+.controls button { background: #e94560; color: white; border: none; padding: 7px 18px; cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 13px; transition: background 0.2s; }
+.controls button:hover { background: #d63050; }
+
+/* --- Content --- */
+.section-title { padding: 10px 20px; font-size: 14px; font-weight: 600; background: #0f1e38; color: #c0c0e0; border-top: 1px solid #1e2d50; }
+.view-area { position: relative; overflow: hidden; border: 2px solid #2a2a5a; margin: 0 20px; border-radius: 4px; }
+.side-by-side { display: flex; gap: 2px; margin: 0 20px; }
+.side-by-side > div { flex: 1; overflow: hidden; position: relative; }
+.side-by-side img { width: 100%; display: block; }
+.side-by-side h3 { text-align: center; padding: 6px; background: #1a1a3e; font-size: 12px; font-weight: 600; color: #8888aa; text-transform: uppercase; letter-spacing: 0.5px; }
+.crop-box { overflow: hidden; position: relative; border: 2px solid #e9a000; border-radius: 4px; }
+
+/* --- Instructions (shown when no URL provided) --- */
+.instructions { max-width: 700px; margin: 60px auto; padding: 40px; text-align: center; }
+.instructions h2 { font-size: 22px; margin-bottom: 16px; color: #fff; }
+.instructions p { font-size: 14px; color: #8888aa; line-height: 1.7; margin-bottom: 12px; }
+.instructions code { background: #1a1a3e; padding: 2px 8px; border-radius: 4px; font-size: 13px; color: #e94560; }
+.instructions .steps { text-align: left; margin-top: 24px; }
+.instructions .steps li { margin-bottom: 10px; color: #b0b0cc; font-size: 14px; }
+.instructions .steps li strong { color: #fff; }
+
+/* --- Link sharing bar --- */
+.share-bar { padding: 8px 20px; background: #0d1528; border-top: 1px solid #1e2d50; display: flex; gap: 10px; align-items: center; }
+.share-bar label { font-size: 12px; color: #666688; white-space: nowrap; }
+.share-bar input { flex: 1; background: #0f1e38; color: #8888aa; border: 1px solid #1e2d50; padding: 5px 8px; border-radius: 4px; font-size: 11px; font-family: monospace; }
+.share-bar button { background: #2a3a5a; color: #b0b0cc; border: none; padding: 5px 12px; cursor: pointer; border-radius: 4px; font-size: 12px; }
+.share-bar button:hover { background: #3a4a6a; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>HW8 Menu <span>Comparison Tool</span></h1>
+  <p>COM-360 Web Page Design — Compare your CSS menu against the target KG website screenshot</p>
+</div>
+
+<div class="controls" id="controlBar">
+  <label>Student URL: <input type="text" id="studentUrl" placeholder="https://username.github.io/personal-page/hw8/"></label>
+  <label>KG Screenshot: <input type="text" id="kgUrl" placeholder="https://cdn.imgchest.com/files/..."></label>
+  <label>Width: <input type="number" id="viewWidth" value="1200"></label>
+  <label style="cursor:pointer;user-select:none;"><input type="checkbox" id="redColor"> 🔴 Red Color</label>
+  <label>Opacity: <input type="range" id="opacitySlider" min="0" max="100" value="50"> <span id="opacityVal">0.5</span></label>
+  <button onclick="loadComparison()">Load</button>
+</div>
+
+<div class="share-bar">
+  <label>📎 Shareable link:</label>
+  <input type="text" id="shareLink" readonly>
+  <button onclick="copyShareLink()">Copy</button>
+</div>
+
+<div id="mainContent" style="display:none;">
+  <div class="section-title">1. OVERLAY VIEW — Student's menu (with opacity) over KG screenshot</div>
+  <div class="view-area" id="overlayView" style="height: 80px;"></div>
+
+  <div class="section-title">2. SIDE-BY-SIDE — Student menu crop vs KG menu crop</div>
+  <div class="side-by-side" id="sideBySide">
+    <div>
+      <h3>Student's CSS Menu</h3>
+      <div class="crop-box" id="studentCrop" style="height: 70px;"></div>
+    </div>
+    <div>
+      <h3>KG Screenshot Menu</h3>
+      <div class="crop-box" id="kgCrop" style="height: 70px;"></div>
+    </div>
+  </div>
+
+  <div class="section-title">3. FULL PAGE with opacity (scroll to inspect)</div>
+  <div class="view-area" id="fullView" style="height: 600px;"></div>
+</div>
+
+<div class="instructions" id="instructionsPanel">
+  <h2>🔍 Compare Your Menu</h2>
+  <p>This tool overlays your CSS-generated menu on top of the original KG website screenshot so you can check for pixel-perfect accuracy.</p>
+  <ol class="steps">
+    <li><strong>Enter your GitHub Pages URL</strong> — e.g. <code>https://username.github.io/personal-page/hw8/</code></li>
+    <li><strong>Enter the KG screenshot URL</strong> — from the assignment email you received</li>
+    <li><strong>Set the width</strong> — the <code>max-width</code> value from your assignment email</li>
+    <li>Click <strong>Load</strong> to compare</li>
+  </ol>
+  <p style="margin-top: 20px;">💡 <strong>Tip:</strong> Check the <strong>🔴 Red Color</strong> box to make your CSS text red — this makes it easy to spot differences between your text and the original white menu text underneath.</p>
+</div>
+
+<script>
+// --- Query Parameter Support ---
+const params = new URLSearchParams(window.location.search);
+const paramUrl = params.get('url') || '';
+const paramKg = params.get('kg') || '';
+const paramWidth = params.get('width') || '';
+
+if (paramUrl) document.getElementById('studentUrl').value = paramUrl;
+if (paramKg) document.getElementById('kgUrl').value = paramKg;
+if (paramWidth) document.getElementById('viewWidth').value = paramWidth;
+
+const opacitySlider = document.getElementById('opacitySlider');
+const opacityVal = document.getElementById('opacityVal');
+const redColor = document.getElementById('redColor');
+
+// --- Shareable Link ---
+function updateShareLink() {
+  const url = document.getElementById('studentUrl').value;
+  const kg = document.getElementById('kgUrl').value;
+  const w = document.getElementById('viewWidth').value;
+  const base = window.location.origin + window.location.pathname;
+  const share = `${base}?url=${encodeURIComponent(url)}&kg=${encodeURIComponent(kg)}&width=${w}`;
+  document.getElementById('shareLink').value = share;
+}
+
+function copyShareLink() {
+  const input = document.getElementById('shareLink');
+  input.select();
+  navigator.clipboard.writeText(input.value);
+  const btn = input.nextElementSibling;
+  btn.textContent = '✓ Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+
+// --- Red Color Injection (fetch student HTML, inject color:red) ---
+let redBlobUrl = null;
+let redBlobSourceUrl = null;
+
+async function buildRedUrl(studentUrl) {
+  if (redBlobUrl && redBlobSourceUrl === studentUrl) return redBlobUrl;
+  try {
+    const resp = await fetch(studentUrl);
+    let html = await resp.text();
+    const baseUrl = studentUrl.endsWith('/') ? studentUrl : studentUrl.substring(0, studentUrl.lastIndexOf('/') + 1);
+    const inject = `<base href="${baseUrl}"><style>*{color:red!important;border-color:red!important;}</style>`;
+    if (html.match(/<head[^>]*>/i)) {
+      html = html.replace(/<head([^>]*)>/i, `<head$1>${inject}`);
+    } else {
+      html = inject + html;
+    }
+    if (redBlobUrl) URL.revokeObjectURL(redBlobUrl);
+    redBlobUrl = URL.createObjectURL(new Blob([html], {type: 'text/html'}));
+    redBlobSourceUrl = studentUrl;
+    return redBlobUrl;
+  } catch(e) {
+    console.error('Red injection failed (CORS?):', e);
+    return studentUrl;
+  }
+}
+
+function invalidateRedCache() {
+  if (redBlobUrl) URL.revokeObjectURL(redBlobUrl);
+  redBlobUrl = null;
+  redBlobSourceUrl = null;
+}
+
+// --- Opacity control ---
+opacitySlider.addEventListener('input', () => {
+  const val = opacitySlider.value / 100;
+  opacityVal.textContent = val.toFixed(2);
+  document.querySelectorAll('.student-overlay').forEach(el => el.style.opacity = val);
+});
+
+// --- Red Color toggle ---
+redColor.addEventListener('change', async () => {
+  const studentUrl = document.getElementById('studentUrl').value;
+  const iframes = document.querySelectorAll('.student-iframe');
+  if (redColor.checked) {
+    const url = await buildRedUrl(studentUrl);
+    iframes.forEach(f => f.src = url);
+  } else {
+    iframes.forEach(f => f.src = studentUrl);
+  }
+});
+
+// --- Main load ---
+async function loadComparison() {
+  const studentUrl = document.getElementById('studentUrl').value;
+  const kgUrl = document.getElementById('kgUrl').value;
+  const w = parseInt(document.getElementById('viewWidth').value);
+  const opacity = opacitySlider.value / 100;
+
+  if (!studentUrl || !kgUrl) {
+    alert('Please enter both a Student URL and KG Screenshot URL.');
+    return;
+  }
+
+  // Show content, hide instructions
+  document.getElementById('mainContent').style.display = 'block';
+  document.getElementById('instructionsPanel').style.display = 'none';
+
+  // Update shareable link
+  updateShareLink();
+
+  // Invalidate red cache if student URL changed
+  if (redBlobSourceUrl !== studentUrl) invalidateRedCache();
+
+  const iframeSrc = redColor.checked ? await buildRedUrl(studentUrl) : studentUrl;
+
+  // Overlay view
+  const overlay = document.getElementById('overlayView');
+  overlay.style.width = w + 'px';
+  overlay.innerHTML = `
+    <img src="${kgUrl}" style="width:${w}px;display:block;position:absolute;top:0;left:0;">
+    <iframe src="${iframeSrc}" class="student-overlay student-iframe" style="width:${w}px;height:1200px;position:absolute;top:0;left:0;border:none;opacity:${opacity};pointer-events:none;"></iframe>
+  `;
+
+  // Side by side crops
+  const studentCrop = document.getElementById('studentCrop');
+  studentCrop.style.width = (w/2) + 'px';
+  studentCrop.innerHTML = `<iframe src="${iframeSrc}" class="student-iframe" style="width:${w}px;height:1200px;border:none;transform:scale(0.5);transform-origin:top left;"></iframe>`;
+
+  const kgCrop = document.getElementById('kgCrop');
+  kgCrop.style.width = (w/2) + 'px';
+  kgCrop.innerHTML = `<img src="${kgUrl}" style="width:${w}px;display:block;transform:scale(0.5);transform-origin:top left;">`;
+
+  // Full page view
+  const fullView = document.getElementById('fullView');
+  fullView.style.width = w + 'px';
+  fullView.innerHTML = `
+    <img src="${kgUrl}" style="width:${w}px;display:block;position:absolute;top:0;left:0;">
+    <iframe src="${iframeSrc}" class="student-overlay student-iframe" style="width:${w}px;height:1600px;position:absolute;top:0;left:0;border:none;opacity:${opacity};pointer-events:none;"></iframe>
+  `;
+}
+
+// Auto-load if URL params provided
+window.addEventListener('load', () => {
+  if (paramUrl && paramKg) {
+    loadComparison();
+  }
+  updateShareLink();
+});
+</script>
+</body>
+</html>
